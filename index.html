@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000">
+<meta name="mobile-web-app-capable" content="yes">
+<title>5叔挑码助手</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{width:100%;overflow-x:hidden;background:#1a1a1a}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;color:#fff;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+.warn{background:#000;color:#e6c61a;font-size:10px;text-align:center;padding:5px 8px;line-height:1.4;position:sticky;top:0;z-index:200}
+.nav{display:flex;background:#000;border-bottom:1px solid #222;position:sticky;top:22px;z-index:199}
+.nav div{flex:1;text-align:center;padding:11px 0;font-size:13px;color:#666;cursor:pointer}
+.nav div.on{color:#fff;font-weight:bold}
+.pg{display:none;padding:0 0 60px;position:relative;z-index:1}
+.pg.on{display:block}
+.wm{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;overflow:hidden}
+.wm span{position:absolute;font-size:16px;color:rgba(255,255,255,.03);transform:rotate(-25deg);white-space:nowrap}
+.zbar{background:#000;display:grid;grid-template-columns:repeat(12,1fr);padding:8px 4px;gap:0}
+.zbar span{font-size:12px;padding:4px 2px;color:#e6c61a;cursor:pointer;text-align:center}
+.zbar span.off{color:#444}
+.balls12{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;padding:6px 4px;background:#1a1a1a}
+.ball{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11px;font-weight:700;color:#fff;cursor:pointer;transition:all .1s}
+.ball:active{transform:scale(.85)}
+.ball.r{background:#c0392b}
+.ball.b{background:#2471a3}
+.ball.g{background:#1e8449}
+.ball.dim{opacity:.15}
+.srow{display:flex;align-items:center;padding:8px 10px;background:#1a1a1a;gap:8px}
+.srow .mini-ball{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.srow .cnt{color:#ccc;font-size:13px;flex:1}
+.srow .cnt b{color:#e6c61a}
+.srow .acts{display:flex;gap:5px}
+.srow .acts button{background:#333;color:#e6c61a;border:none;padding:6px 10px;border-radius:4px;font-size:11px;cursor:pointer}
+.srow .acts button:active{opacity:.7}
+.attr-grid{background:#000;padding:6px;margin:0}
+.attr-grid .agrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.attr-grid .agrid .ab{background:#000;color:#e6c61a;border:1px solid #444;padding:8px 2px;border-radius:3px;font-size:11px;cursor:pointer;text-align:center;transition:all .1s}
+.attr-grid .agrid .ab:active{transform:scale(.92)}
+.attr-grid .agrid .ab.off{background:#333;color:#fff;border-color:#555}
+.attr-grid .agrid .ab.kill-on{background:#c0392b;color:#fff}
+.attr-grid .agrid .ab.pick-on{background:#1e8449;color:#fff}
+.ibar{display:flex;gap:5px;padding:8px 10px;background:#1a1a1a}
+.ibar input{flex:1;background:#111;border:1px solid #333;color:#fff;padding:9px 10px;border-radius:4px;font-size:13px;user-select:text;-webkit-user-select:text}
+.ibar input::placeholder{color:#444}
+.ibar button{background:#e6c61a;color:#000;border:none;padding:9px 14px;border-radius:4px;font-size:12px;font-weight:bold;cursor:pointer;flex-shrink:0}
+.hint{background:#000;color:#555;font-size:10px;text-align:center;padding:8px;line-height:1.5}
+.sta{width:100%;background:#222;border:1px solid #333;color:#fff;padding:10px;border-radius:4px;font-size:13px;min-height:70px;resize:none;user-select:text;-webkit-user-select:text}
+.sta::placeholder{color:#444}
+.sinfo{background:#222;border-radius:4px;padding:10px;margin:6px 10px;font-size:11px;line-height:1.9;color:#888}
+.sinfo b{color:#e6c61a}
+.sout{background:#222;border-radius:4px;padding:8px 10px;margin:6px 10px}
+.srow2{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #2a2a2a;font-size:12px}
+.srow2:last-child{border:none}
+.srow2 .sl{color:#888}
+.srow2 .sv{color:#e6c61a;font-weight:bold}
+.cta{width:100%;background:#222;border:1px solid #333;color:#fff;padding:12px;border-radius:8px;font-size:15px;min-height:40px;resize:none;user-select:text;-webkit-user-select:text;white-space:nowrap;overflow-x:auto;overflow-y:hidden}
+.cta::placeholder{color:#555}
+.csts{display:flex;justify-content:space-around;background:#000;padding:14px 10px;margin:0 10px 10px;border-radius:8px}
+.csts .ci{text-align:center;flex:1}
+.csts .cl{color:#888;font-size:12px;margin-bottom:6px}
+.csts .cv{color:#e6c61a;font-size:28px;font-weight:bold}
+.cg{background:#222;border-radius:8px;padding:14px;margin:0 10px 10px;font-size:13px;line-height:2;color:#e6c61a;min-height:250px}
+.cg b{font-size:14px}
+.cbtns{display:flex;justify-content:space-around;background:#000;padding:10px 0;margin:0;border-top:1px solid #333}
+.cbtns button{background:none;color:#e6c61a;border:1px solid transparent;padding:8px 12px;font-size:14px;cursor:pointer;transition:all .15s}
+.cbtns button:active{opacity:.7}
+.cbtns button.cb.on{border:1px solid #e6c61a}
+.dta{width:100%;background:#222;border:1px solid #333;color:#fff;padding:10px;border-radius:4px;font-size:13px;min-height:300px;resize:none;user-select:text;-webkit-user-select:text;line-height:1.8}
+.dta::placeholder{color:#444}
+.bbar{position:fixed;bottom:0;left:0;right:0;background:#222;border-top:1px solid #333;display:flex;justify-content:space-around;padding:7px 6px;z-index:100;padding-bottom:calc(7px + env(safe-area-inset-bottom))}
+.bbar button{background:none;border:none;color:#e6c61a;font-size:12px;padding:5px 8px;cursor:pointer}
+.bbar button.ol{border:1px solid #e6c61a;border-radius:4px}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.88);color:#e6c61a;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;display:none;text-align:center}
+.toast.show{display:block;animation:fi 1.5s ease}
+@keyframes fi{0%{opacity:0}15%{opacity:1}85%{opacity:1}100%{opacity:0}}
+@media(max-width:350px){.ball{font-size:9px}.attr-grid .agrid .ab{font-size:9px;padding:6px 1px}}
+
+/* 激活页面样式 */
+.activate-page{position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1a;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.activate-page.hidden{display:none}
+.activate-box{background:#222;border-radius:12px;padding:30px 20px;width:100%;max-width:320px;text-align:center}
+.activate-box h2{color:#e6c61a;font-size:20px;margin-bottom:8px}
+.activate-box p{color:#888;font-size:12px;margin-bottom:20px;line-height:1.6}
+.activate-input{width:100%;background:#111;border:1px solid #444;color:#fff;padding:12px;border-radius:6px;font-size:14px;text-align:center;margin-bottom:15px}
+.activate-input::placeholder{color:#555}
+.activate-btn{width:100%;background:#e6c61a;color:#000;border:none;padding:12px;border-radius:6px;font-size:15px;font-weight:bold;cursor:pointer}
+.activate-btn:active{opacity:.8}
+.activate-error{color:#ff4444;font-size:12px;margin-top:10px;display:none}
+</style>
+</head>
+<body>
+<div class="warn">本软件仅供学习交流,请确保您在使用本软件时遵守当地法律法规,不得用于任何违法活动!</div>
+<div class="nav" id="nav">
+<div class="on" data-p="pick">挑码</div>
+<div data-p="select">选号</div>
+<div data-p="stats">统计</div>
+<div data-p="combo">复式</div>
+<div data-p="draft">草稿</div>
+</div>
+<div class="wm" id="wm"></div>
+
+<div class="pg on" id="p-pick">
+  <div class="zbar" id="pz"></div>
+  <div class="balls12" id="pb"></div>
+  <div class="srow">
+    <div class="mini-ball g" id="pmb">49</div>
+    <span class="cnt">剩 <b id="pr">49</b> 码</span>
+    <div class="acts">
+      <button onclick="copyP()">复制</button>
+      <button onclick="saveDr('pick')">存草稿</button>
+      <button onclick="resetP()">复位</button>
+      <button onclick="pickOut()">挑出</button>
+    </div>
+  </div>
+  <div class="attr-grid"><div class="agrid" id="pa"></div></div>
+  <div class="ibar">
+    <input id="pi" placeholder="填写或粘贴号码 如 2, 3 06">
+  </div>
+  <div class="hint">填写或粘贴号码 如 2, 3 06 再点击 杀 或 出 进行杀码或出码</div>
+</div>
+
+<div class="pg" id="p-select">
+  <div class="zbar" id="sz"></div>
+  <div class="balls12" id="sb"></div>
+  <div class="srow">
+    <div class="mini-ball g" id="smb">49</div>
+    <span class="cnt">剩 <b id="sr">0</b> 码</span>
+    <div class="acts">
+      <button onclick="copyS()">复制</button>
+      <button onclick="saveDr('sel')">存草稿</button>
+      <button onclick="resetS()">复位</button>
+      <button onclick="selOut()">挑出</button>
+    </div>
+  </div>
+  <div class="attr-grid"><div class="agrid" id="sa"></div></div>
+  <div class="ibar">
+    <input id="si" placeholder="填写或粘贴号码 如 2, 3 06">
+  </div>
+  <div class="hint">填写或粘贴号码 如 2, 3 06 再点击 杀 或 出 进行杀码或出码</div>
+</div>
+
+<div class="pg" id="p-stats">
+  <div id="spick" style="display:none">
+    <div class="zbar" id="spz"></div>
+    <div class="balls12" id="spb"></div>
+    <div class="attr-grid"><div class="agrid" id="spa"></div></div>
+  </div>
+  <div style="padding:8px 10px"><textarea class="sta" id="sti" placeholder="所填写或粘贴的号码必须要有空格或其他任意符号间隔开,如:2,3 06.龙虎兔12 24.6合-合单,2尾5尾"></textarea></div>
+  <div class="sinfo" id="sinfo"><b>使用说明:</b><br>• 所填写或粘贴的号码必须要有空格或其他任意符号间隔开,如:2,3 06.龙虎兔12 24.6合-合单,2尾5尾<br>• 左下角"过滤"是过滤括号功能的开关,支持多种常见括号格式,可根据数据的情况启用或关闭<br>• 支持所有繁体字、常见异体字、个别易错字属性统计,如:马馬鸡雞鸡蓝藍兰兔兔<br>• 软件内置多种过滤规则,如:6个、12码、24次等常见单位均不做统计<br>• 默认过滤时间格式,如:【2025-02-23 20:16:19】<br>• 右下角有个"切换",点点看,多点几下<br>• 1,2,和01,02,是一样的</div>
+  <div class="bbar">
+    <button class="ol" onclick="clrSt()">清除</button>
+    <button id="fb" onclick="togFlt()">□ 过滤</button>
+    <button onclick="doSt()">统计</button>
+    <button onclick="cpSt()">复制</button>
+    <button onclick="saveDr('stats')">存草稿</button>
+    <button onclick="togVw()">切换</button>
+  </div>
+</div>
+
+<div class="pg" id="p-combo">
+  <div style="padding:10px"><input type="text" class="cta" id="coi" placeholder="输入号码或生肖，用逗号、空格、句号等隔开"></div>
+  <div class="csts">
+    <div class="ci"><div class="cl">数据个数</div><div class="cv" id="coc">0</div></div>
+    <div class="ci"><div class="cl">组合数量</div><div class="cv" id="cor">0</div></div>
+  </div>
+  <div class="cg" id="coinfo"><b>使用说明</b><br>所填写或粘贴的数据必须要有空格或其他符号间隔开<br>示例一：填写 02 03 06 12 24 36 ，再点击"复 3"<br>示例二：填写 龙，虎，兔，狗，猪，再点击"复 4"<br>示例三：填写 3尾，5尾，7尾，8尾，再点击"复 2"</div>
+  <div class="cbtns">
+    <button onclick="clrCo()">清除</button>
+    <button class="cb" id="co2" onclick="togCo(2)">复 2</button>
+    <button class="cb" id="co3" onclick="togCo(3)">复 3</button>
+    <button class="cb" id="co4" onclick="togCo(4)">复 4</button>
+    <button class="cb" id="co5" onclick="togCo(5)">复 5</button>
+    <button onclick="cpCo()">复制</button>
+  </div>
+</div>
+
+<div class="pg" id="p-draft">
+  <div style="padding:8px 10px"><textarea class="dta" id="dta" placeholder="草稿内容会显示在这里..."></textarea></div>
+  <div class="bbar"><button onclick="clrDr()">清除</button><button onclick="cpDr()">复制</button><button onclick="share()">分享软件</button></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 激活页面 -->
+<div class="activate-page" id="activatePage">
+  <div class="activate-box">
+    <h2>🔐 激活验证</h2>
+    <p>您的设备码：</p>
+    <div style="background:#111;border:1px solid #444;border-radius:6px;padding:10px;margin-bottom:15px;color:#e6c61a;font-size:16px;font-weight:bold;letter-spacing:2px" id="deviceId">生成中...</div>
+    <p style="font-size:11px;color:#666;margin-bottom:15px">请将设备码发给管理员获取激活码</p>
+    <input type="text" class="activate-input" id="activateCode" placeholder="请输入激活码" autocomplete="off">
+    <button class="activate-btn" onclick="checkActivate()">激活</button>
+    <div class="activate-error" id="activateError">激活码无效，请重新输入</div>
+  </div>
+</div>
+
+<script>
+// ========== 一机一码激活系统 ==========
+
+// 生成设备指纹
+function generateDeviceId() {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'top';
+  ctx.font = '14px Arial';
+  ctx.fillText('5叔挑码助手', 2, 2);
+  const canvasData = canvas.toDataURL();
+  
+  // 收集浏览器特征
+  const features = [
+    navigator.userAgent || '',
+    navigator.language || '',
+    screen.width + 'x' + screen.height,
+    screen.colorDepth || '',
+    new Date().getTimezoneOffset(),
+    canvasData.substring(0, 100)
+  ].join('|');
+  
+  // 简单哈希
+  let hash = 0;
+  for (let i = 0; i < features.length; i++) {
+    const char = features.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  
+  // 格式化为 XXXX-XXXX
+  const hex = Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+  return hex.substring(0, 4) + '-' + hex.substring(4, 8);
+}
+
+// 根据设备码生成激活码（管理员用）
+function generateActivationCode(deviceId) {
+  // 简单算法：设备码反转 + 固定后缀
+  const reversed = deviceId.replace('-', '').split('').reverse().join('');
+  return 'ACT' + reversed.substring(0, 4) + '5S';
+}
+
+// 验证激活码
+function checkActivate() {
+  const deviceId = localStorage.getItem('device_id');
+  const code = document.getElementById('activateCode').value.trim().toUpperCase();
+  const errorEl = document.getElementById('activateError');
+  
+  if (!code) {
+    errorEl.textContent = '请输入激活码';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  // 验证：根据当前设备码生成正确的激活码
+  const correctCode = generateActivationCode(deviceId);
+  
+  if (code === correctCode) {
+    localStorage.setItem('caihong_activated', 'true');
+    document.getElementById('activatePage').classList.add('hidden');
+    toast('激活成功！');
+  } else {
+    errorEl.textContent = '激活码无效，请重新输入';
+    errorEl.style.display = 'block';
+  }
+}
+
+// 页面加载时初始化
+window.addEventListener('DOMContentLoaded', function() {
+  // 生成或获取设备码
+  let deviceId = localStorage.getItem('device_id');
+  if (!deviceId) {
+    deviceId = generateDeviceId();
+    localStorage.setItem('device_id', deviceId);
+  }
+  
+  // 显示设备码
+  document.getElementById('deviceId').textContent = deviceId;
+  
+  // 检查是否已激活
+  if (localStorage.getItem('caihong_activated') === 'true') {
+    document.getElementById('activatePage').classList.add('hidden');
+  }
+});
+
+// 回车键激活
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('activateCode');
+  if (input) {
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') checkActivate();
+    });
+  }
+});
+
+const COL={1:'r',2:'b',3:'b',4:'b',5:'g',6:'b',7:'r',8:'b',9:'b',10:'b',11:'g',12:'r',13:'r',14:'b',15:'b',16:'g',17:'g',18:'r',19:'r',20:'b',21:'b',22:'g',23:'r',24:'r',25:'b',26:'g',27:'g',28:'r',29:'r',30:'b',31:'b',32:'g',33:'g',34:'r',35:'r',36:'b',37:'b',38:'g',39:'g',40:'r',41:'g',42:'r',43:'r',44:'b',45:'g',46:'b',47:'b',48:'g',49:'g'};
+const ZOD={'马':[1,13,25,37,49],'蛇':[2,14,26,38],'龙':[3,15,27,39],'兔':[4,16,28,40],'虎':[5,17,29,41],'牛':[6,18,30,42],'鼠':[7,19,31,43],'猪':[8,20,32,44],'狗':[9,21,33,45],'鸡':[10,22,34,46],'猴':[11,23,35,47],'羊':[12,24,36,48]};
+const ZO=['马','蛇','龙','兔','虎','牛','鼠','猪','狗','鸡','猴','羊'];
+const NZ={};for(let z in ZOD)ZOD[z].forEach(n=>NZ[n]=z);
+const HM=['牛','马','羊','鸡','狗','猪'],WL=['鼠','虎','兔','蛇','龙','猴'];
+function wx(n){const s=(2024-n)%10;return{0:'金',1:'金',2:'水',3:'水',4:'木',5:'木',6:'火',7:'火',8:'土',9:'土'}[s]}
+function hs(n){return Math.floor(n/10)+(n%10)}
+function pd(n){return String(n).padStart(2,'0')}
+
+let pS={},sS={};
+for(let i=1;i<=49;i++){pS[i]='lit';sS[i]=null}
+let pMode=null,sMode=null,fltOn=false,vw=0;
+let pAttrOn={};for(let i=0;i<77;i++)pAttrOn[i]=true;
+let AF=[];
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',1500)}
+function clip(t){if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>toast('已复制'));else{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);toast('已复制')}}
+
+!function(){const w=document.getElementById('wm');for(let i=0;i<25;i++){const s=document.createElement('span');s.textContent='5叔挑码助手';s.style.left=(Math.random()*130-15)+'%';s.style.top=(Math.random()*130-15)+'%';w.appendChild(s)}}();
+
+function mkZod(id,page){
+  const bar=document.getElementById(id);
+  ZO.forEach(z=>{
+    const s=document.createElement('span');s.textContent=z;s.dataset.z=z;
+    s.onclick=()=>{
+      s.classList.toggle('off');
+      const st=page==='p'?pS:sS,gid=page==='p'?'pb':'sb',rid=page==='p'?'pr':'sr';
+      const isOff=s.classList.contains('off');
+      (ZOD[z]||[]).forEach(n=>{
+        const el=document.querySelector('#'+gid+' [data-n="'+n+'"]');
+        if(el){
+          if(isOff){st[n]=null;el.className='ball '+COL[n]+' dim'}
+          else{st[n]='lit';el.className='ball '+COL[n]}
+        }
+      });
+      updR(rid,st);
+    };
+    bar.appendChild(s);
+  });
+}
+
+function mkBalls(id,st,rid,init){
+  const g=document.getElementById(id);g.innerHTML='';
+  for(let i=1;i<=49;i++){
+    const d=document.createElement('div');
+    d.className='ball '+COL[i]+(init==='dim'?' dim':'');
+    d.textContent=pd(i);d.dataset.n=i;
+    d.onclick=()=>togB(i,d,st,rid);
+    g.appendChild(d);
+  }
+}
+function togB(n,el,st,rid){
+  if(st[n]==='lit'){st[n]=null;el.className='ball '+COL[n]+' dim'}
+  else{st[n]='lit';el.className='ball '+COL[n]}
+  updR(rid,st);
+}
+function setB(n,st,el,v,rid){
+  st[n]=v;
+  // v==='lit' 表示亮灯, v==='dim' 或 v===null 表示灭灯
+  el.className='ball '+COL[n]+(v==='lit'?'':' dim');
+  updR(rid,st);
+}
+function updR(id,st){
+  const lit=Object.values(st).filter(v=>v==='lit').length;
+  document.getElementById(id).textContent=lit;
+}
+
+// 属性按钮通用toggle:点一下亮(黄),对应号码灭灯;再点灭(灰),对应号码亮回来
+function mkAttr(gridId,ballGridId,remId,st,page){
+  const items=[
+    '1段','2段','3段','4段','5段','6段','7段',
+    '大尾','小尾','0尾','1尾','2尾','3尾','4尾',
+    '5尾','6尾','7尾','8尾','9尾','0头','1头',
+    '2头','3头','4头','单','双','大','小',
+    '大单','小单','大双','小双','0头单','1头单','2头单',
+    '3头单','4头单','0头双','1头双','2头双','3头双','4头双',
+    '1合','2合','3合','4合','5合','6合','7合',
+    '8合','9合','10合','11合','12合','13合','金',
+    '红','绿','蓝','木','水','火','土',
+    '红单','绿单','蓝单','合单','合大','红双','绿双',
+    '蓝双','合双','合小','家禽','野兽','杀','出'
+  ];
+  const fns=[
+    n=>Math.ceil(n/7)===1,n=>Math.ceil(n/7)===2,n=>Math.ceil(n/7)===3,n=>Math.ceil(n/7)===4,n=>Math.ceil(n/7)===5,n=>Math.ceil(n/7)===6,n=>Math.ceil(n/7)===7,
+    n=>(n%10)>=5,n=>(n%10)<5,n=>(n%10)===0,n=>(n%10)===1,n=>(n%10)===2,n=>(n%10)===3,n=>(n%10)===4,
+    n=>(n%10)===5,n=>(n%10)===6,n=>(n%10)===7,n=>(n%10)===8,n=>(n%10)===9,n=>Math.floor(n/10)===0,n=>Math.floor(n/10)===1,
+    n=>Math.floor(n/10)===2,n=>Math.floor(n/10)===3,n=>Math.floor(n/10)===4,n=>n%2===1,n=>n%2===0,n=>n>=25,n=>n<25,
+    n=>n>=25&&n%2===1,n=>n<25&&n%2===1,n=>n>=25&&n%2===0,n=>n<25&&n%2===0,
+    n=>Math.floor(n/10)===0&&n%2===1,n=>Math.floor(n/10)===1&&n%2===1,n=>Math.floor(n/10)===2&&n%2===1,
+    n=>Math.floor(n/10)===3&&n%2===1,n=>Math.floor(n/10)===4&&n%2===1,
+    n=>Math.floor(n/10)===0&&n%2===0,n=>Math.floor(n/10)===1&&n%2===0,n=>Math.floor(n/10)===2&&n%2===0,n=>Math.floor(n/10)===3&&n%2===0,n=>Math.floor(n/10)===4&&n%2===0,
+    n=>hs(n)===1,n=>hs(n)===2,n=>hs(n)===3,n=>hs(n)===4,n=>hs(n)===5,n=>hs(n)===6,n=>hs(n)===7,
+    n=>hs(n)===8,n=>hs(n)===9,n=>hs(n)===10,n=>hs(n)===11,n=>hs(n)===12,n=>hs(n)===13,n=>wx(n)==='金',
+    n=>COL[n]==='r',n=>COL[n]==='g',n=>COL[n]==='b',n=>wx(n)==='木',n=>wx(n)==='水',n=>wx(n)==='火',n=>wx(n)==='土',
+    n=>COL[n]==='r'&&n%2===1,n=>COL[n]==='g'&&n%2===1,n=>COL[n]==='b'&&n%2===1,n=>hs(n)%2===1,n=>hs(n)>=5,n=>COL[n]==='r'&&n%2===0,n=>COL[n]==='g'&&n%2===0,
+    n=>COL[n]==='b'&&n%2===0,n=>hs(n)%2===0,n=>hs(n)<5,
+    null,null,null,null
+  ];
+  const g=document.getElementById(gridId);g.innerHTML='';
+  items.forEach((t,i)=>{
+    const b=document.createElement('button');b.className='ab';b.textContent=t;
+    // 家禽
+    if(t==='家禽'){
+      b.onclick=()=>{
+        b.classList.toggle('off');
+        const isOff=b.classList.contains('off');
+        HM.forEach(z=>{
+          (ZOD[z]||[]).forEach(n=>{
+            const el=document.querySelector('#'+ballGridId+' [data-n="'+n+'"]');
+            if(el){
+              if(page==='p'){
+                if(isOff){st[n]=null;el.className='ball '+COL[n]+' dim'}
+                else{st[n]='lit';el.className='ball '+COL[n]}
+              }else{
+                if(isOff){st[n]=null;el.className='ball '+COL[n]+' dim'}
+                else{st[n]='lit';el.className='ball '+COL[n]}
+              }
+            }
+          });
+        });
+        updR(remId,st);
+      };
+      if(page==='s')b.classList.add('off');
+      g.appendChild(b);return;
+    }
+    // 野兽
+    if(t==='野兽'){
+      b.onclick=()=>{
+        b.classList.toggle('off');
+        const isOff=b.classList.contains('off');
+        WL.forEach(z=>{
+          (ZOD[z]||[]).forEach(n=>{
+            const el=document.querySelector('#'+ballGridId+' [data-n="'+n+'"]');
+            if(el){
+              if(isOff){st[n]=null;el.className='ball '+COL[n]+' dim'}
+              else{st[n]='lit';el.className='ball '+COL[n]}
+            }
+          });
+        });
+        updR(remId,st);
+      };
+      if(page==='s')b.classList.add('off');
+      g.appendChild(b);return;
+    }
+    // 杀
+    if(t==='杀'){
+      b.onclick=()=>{
+        const all=g.querySelectorAll('.ab');
+        const kb=all[all.length-2],pb=all[all.length-1];
+        if(page==='p'){
+          if(pMode==='kill'){pMode=null;b.classList.remove('kill-on')}
+          else{pMode='kill';kb.classList.remove('kill-on');pb.classList.remove('pick-on');b.classList.add('kill-on')}
+          // 杀:输入框里的灭灯,不在输入框里的亮灯
+          const nums=(document.getElementById('pi').value.match(/\d+/g)||[]).map(Number).filter(n=>n>=1&&n<=49);
+          const numSet=new Set(nums);
+          for(let n=1;n<=49;n++){
+            const el=document.querySelector('#pb [data-n="'+n+'"]');
+            if(el){
+              if(numSet.has(n)){pS[n]=null;el.className='ball '+COL[n]+' dim'}
+              else{pS[n]='lit';el.className='ball '+COL[n]}
+            }
+          }
+          updR('pr',pS);
+        }else{
+          if(sMode==='kill'){sMode=null;b.classList.remove('kill-on')}
+          else{sMode='kill';kb.classList.remove('kill-on');pb.classList.remove('pick-on');b.classList.add('kill-on')}
+          // 杀:输入框里的灭灯,不在输入框里的亮灯
+          const nums=(document.getElementById('si').value.match(/\d+/g)||[]).map(Number).filter(n=>n>=1&&n<=49);
+          const numSet=new Set(nums);
+          for(let n=1;n<=49;n++){
+            const el=document.querySelector('#sb [data-n="'+n+'"]');
+            if(el){
+              if(numSet.has(n)){sS[n]=null;el.className='ball '+COL[n]+' dim'}
+              else{sS[n]='lit';el.className='ball '+COL[n]}
+            }
+          }
+          updR('sr',sS);
+        }
+      };
+      g.appendChild(b);return;
+    }
+    // 出
+    if(t==='出'){
+      b.onclick=()=>{
+        const all=g.querySelectorAll('.ab');
+        const kb=all[all.length-2],pb=all[all.length-1];
+        if(page==='p'){
+          if(pMode==='pick'){pMode=null;b.classList.remove('pick-on')}
+          else{pMode='pick';kb.classList.remove('kill-on');pb.classList.remove('pick-on');b.classList.add('pick-on')}
+          // 出:输入框里的亮灯,不在输入框里的灭灯
+          const nums=(document.getElementById('pi').value.match(/\d+/g)||[]).map(Number).filter(n=>n>=1&&n<=49);
+          const numSet=new Set(nums);
+          for(let n=1;n<=49;n++){
+            const el=document.querySelector('#pb [data-n="'+n+'"]');
+            if(el){
+              if(numSet.has(n)){pS[n]='lit';el.className='ball '+COL[n]}
+              else{pS[n]=null;el.className='ball '+COL[n]+' dim'}
+            }
+          }
+          updR('pr',pS);
+        }else{
+          if(sMode==='pick'){sMode=null;b.classList.remove('pick-on')}
+          else{sMode='pick';kb.classList.remove('kill-on');pb.classList.remove('pick-on');b.classList.add('pick-on')}
+          // 出:输入框里的亮灯,不在输入框里的灭灯
+          const nums=(document.getElementById('si').value.match(/\d+/g)||[]).map(Number).filter(n=>n>=1&&n<=49);
+          const numSet=new Set(nums);
+          for(let n=1;n<=49;n++){
+            const el=document.querySelector('#sb [data-n="'+n+'"]');
+            if(el){
+              if(numSet.has(n)){sS[n]='lit';el.className='ball '+COL[n]}
+              else{sS[n]=null;el.className='ball '+COL[n]+' dim'}
+            }
+          }
+          updR('sr',sS);
+        }
+      };
+      g.appendChild(b);return;
+    }
+    // 普通筛选 - 挑码页初始黑底黄字(亮),选号页初始灰底白字(灭)
+    if(page==='s')b.classList.add('off');
+    b.onclick=()=>{
+      b.classList.toggle('off');
+      const isOff=b.classList.contains('off');
+      for(let n=1;n<=49;n++){
+        if(fns[i](n)){
+          const el=document.querySelector('#'+ballGridId+' [data-n="'+n+'"]');
+          if(el){
+            if(isOff){st[n]=null;el.className='ball '+COL[n]+' dim'}
+            else{st[n]='lit';el.className='ball '+COL[n]}
+          }
+        }
+      }
+      updR(remId,st);
+    };
+    g.appendChild(b);
+  });
+}
+
+function doPickInput(){
+  const nums=(document.getElementById('pi').value.match(/\d+/g)||[]).map(Number).filter(n=>n>=1&&n<=49);
+  if(!nums.length)return;
+  nums.forEach(n=>{
+    const el=document.querySelector('#pb [data-n="'+n+'"]');
+    if(el){
+      if(pMode==='kill')setB(n,pS,el,null,'pr');
+      else if(pMode==='pick'){pS[n]='lit';el.className='ball '+COL[n];updR('pr',pS)}
+    }
+  });
+}
+
+function doSI(mode){
+  const nums=(document.getElementById('si').value.match(/\d+/g)||[]).map(Number).filter(n=>n>=1&&n<=49);
+  if(!nums.length)return toast('请输入号码');
+  nums.forEach(n=>{
+    const el=document.querySelector('#sb [data-n="'+n+'"]');
+    if(el){
+      if(mode==='kill')setB(n,sS,el,null,'sr');
+      else{sS[n]='lit';el.className='ball '+COL[n];updR('sr',sS)}
+    }
+  });
+  document.getElementById('si').value='';
+}
+
+function getLit(st){const r=[];for(let i=1;i<=49;i++)if(st[i]==='lit')r.push(pd(i));return r}
+function pickOut(){const a=getLit(pS);if(!a.length)return toast('没有选中');clip(a.join(' '))}
+function selOut(){const a=getLit(sS);if(!a.length)return toast('没有选中');clip(a.join(' '))}
+function copyP(){pickOut()}
+function copyS(){selOut()}
+function resetP(){
+  for(let i=1;i<=49;i++)pS[i]='lit';
+  document.querySelectorAll('#pb .ball').forEach(b=>b.className='ball '+COL[+b.dataset.n]);
+  pMode=null;
+  // 筛选按钮恢复为黑底黄字(初始状态)
+  document.querySelectorAll('#pa .ab').forEach(b=>{
+    b.classList.remove('off','kill-on','pick-on');
+  });
+  document.querySelectorAll('#pz span').forEach(s=>s.classList.remove('off'));
+  // 清空输入框
+  document.getElementById('pi').value='';
+  updR('pr',pS);
+}
+function resetS(){
+  for(let i=1;i<=49;i++)sS[i]=null;
+  document.querySelectorAll('#sb .ball').forEach(b=>b.className='ball '+COL[+b.dataset.n]+' dim');
+  sMode=null;
+  document.querySelectorAll('#sa .ab').forEach(b=>b.classList.remove('on','kill-on','pick-on'));
+  document.querySelectorAll('#sz span').forEach(s=>s.classList.remove('off'));
+  updR('sr',sS);
+}
+
+function saveDr(from){
+  let a=[];
+  if(from==='pick')a=getLit(pS);
+  else if(from==='sel')a=getLit(sS);
+  else if(from==='stats'){
+    const sinfo=document.getElementById('sinfo');
+    const rows=sinfo.querySelectorAll('.srow2');
+    if(!rows.length)return toast('没有统计结果');
+    const nums=[];
+    rows.forEach(r=>{
+      const num=r.querySelector('.sl')?.textContent;
+      if(num)nums.push(num);
+    });
+    if(!nums.length)return toast('没有统计结果');
+    const t=new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+    const d=document.getElementById('dta');
+    d.value+=(d.value?'\n':'')+`[统计 ${t}] ${nums.join(' ')}`;
+    toast('已保存');
+    return;
+  }
+  if(!a.length)return toast('没有选中');
+  const t=new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+  const lb={pick:'挑码',sel:'选号'}[from];
+  const d=document.getElementById('dta');
+  d.value+=(d.value?'\n':'')+`[${lb} ${t}] ${a.join(' ')}`;
+  toast('已保存');
+}
+function clrDr(){if(confirm('确定清除?'))document.getElementById('dta').value=''}
+function cpDr(){const t=document.getElementById('dta').value;if(!t)return toast('空');clip(t)}
+function share(){if(navigator.share)navigator.share({title:'5叔挑码助手',url:location.href});else clip(location.href)}
+
+function doSt(){
+  let v=document.getElementById('sti').value;
+  if(!v.trim())return toast('请输入号码');
+  // 如果过滤开启,去掉括号内的内容
+  if(fltOn){
+    // 过滤各种括号及其内容
+    v=v.replace(/【[^】]*】/g,'');
+    v=v.replace(/\[[^\]]*\]/g,'');
+    v=v.replace(/\([^)]*\)/g,'');
+    v=v.replace(/([^)]*)/g,'');
+    v=v.replace(/\{[^}]*\}/g,'');
+    v=v.replace(/《[^》]*》/g,'');
+    v=v.replace(/<[^>]*>/g,'');
+  }
+  // 提取所有号码
+  const nums=(v.match(/\d+/g)||[]).map(Number).filter(n=>n>=1&&n<=49);
+  if(!nums.length)return toast('未找到有效号码');
+  // 统计每个号码出现次数
+  const cnt={};
+  nums.forEach(n=>{cnt[n]=(cnt[n]||0)+1});
+  // 找出所有号码(按出现次数排序)
+  const all=[];
+  for(let n in cnt){
+    all.push({num:+n,count:cnt[n]});
+  }
+  const sinfo=document.getElementById('sinfo');
+  if(!all.length){
+    sinfo.innerHTML='<div style="color:#888;font-size:12px;padding:8px 0">没有号码</div>';
+    return;
+  }
+  // 按出现次数排序
+  all.sort((a,b)=>b.count-a.count);
+  let html='<div style="color:#e6c61a;font-size:12px;margin-bottom:6px">号码统计(共'+all.length+'个):</div>';
+  all.forEach(d=>{
+    html+='<div class="srow2"><span class="sl">'+pd(d.num)+'</span><span class="sv">'+d.count+'次</span></div>';
+  });
+  sinfo.innerHTML=html;
+}
+function clrSt(){
+  document.getElementById('sti').value='';
+  // 恢复使用说明
+  document.getElementById('sinfo').innerHTML='<b>使用说明:</b><br>• 所填写或粘贴的号码必须要有空格或其他任意符号间隔开,如:2,3 06.龙虎兔12 24.6合-合单,2尾5尾<br>• 左下角"过滤"是过滤括号功能的开关,支持多种常见括号格式,可根据数据的情况启用或关闭<br>• 支持所有繁体字、常见异体字、个别易错字属性统计,如:马馬鸡雞鸡蓝藍兰兔兔<br>• 软件内置多种过滤规则,如:6个、12码、24次等常见单位均不做统计<br>• 默认过滤时间格式,如:【2025-02-23 20:16:19】<br>• 右下角有个"切换",点点看,多点几下<br>• 1,2,和01,02,是一样的';
+}
+function cpSt(){const t=document.getElementById('sti').value;if(!t)return toast('空');clip(t)}
+function togFlt(){fltOn=!fltOn;document.getElementById('fb').textContent=fltOn?'☑ 过滤':'□ 过滤';toast(fltOn?'过滤已开启':'过滤已关闭')}
+function togVw(){
+  const el=document.getElementById('spick');
+  if(el.style.display==='none'){
+    el.style.display='block';
+    // 初始化统计页的挑码区
+    if(!document.querySelector('#spb .ball')){
+      const st={};
+      for(let i=1;i<=49;i++)st[i]='lit';
+      mkZod('spz','p');
+      mkBalls('spb',st,'spr','lit');
+      mkAttr('spa','spb','spr',st,'p');
+    }
+  }else{
+    el.style.display='none';
+  }
+}
+
+document.addEventListener('input',e=>{if(e.target.id==='coi'){const items=e.target.value.split(/[\s,,;;]+/).filter(i=>i.trim());document.getElementById('coc').textContent=items.length}});
+let coResult='';
+let coActive=0; // 当前激活的复式按钮
+const coInfoDefault='<b>使用说明</b><br>所填写或粘贴的数据必须要有空格或其他符号间隔开<br>示例一:填写 02 03 06 12 24 36 ,再点击"复 3"<br>示例二:填写 龙,虎,兔,狗,猪,再点击"复 4"<br>示例三:填写 3尾,5尾,7尾,8尾,再点击"复 2"';
+
+function togCo(n){
+  const btn=document.getElementById('co'+n);
+  // 如果点击的是当前激活的按钮,则关闭
+  if(coActive===n){
+    btn.classList.remove('on');
+    coActive=0;
+    coResult='';
+    document.getElementById('cor').textContent='0';
+    document.getElementById('coinfo').innerHTML=coInfoDefault;
+    return;
+  }
+  // 关闭之前的按钮
+  if(coActive>0){
+    document.getElementById('co'+coActive).classList.remove('on');
+  }
+  // 激活新按钮
+  btn.classList.add('on');
+  coActive=n;
+  doCo(n);
+}
+
+function doCo(n){
+  const v=document.getElementById('coi').value;
+  let items=v.split(/[\s,，.。、;；:：!！?？]+/).filter(i=>i.trim());
+  // 检测输入类型：全部是生肖则按生肖组合，否则按号码组合
+  const allZod=items.every(it=>ZOD[it]);
+  let exp=[];
+  if(allZod&&items.length>0){
+    // 按生肖组合
+    exp=items.slice();
+  }else{
+    // 按号码组合（生肖展开为号码）
+    items.forEach(it=>{
+      if(ZOD[it])ZOD[it].forEach(num=>exp.push(pd(num)));
+      else if(it)exp.push(it);
+    });
+  }
+  const m=exp.length;
+  document.getElementById('coc').textContent=m;
+  if(m<n){
+    document.getElementById('cor').textContent=0;
+    coResult='';
+    document.getElementById('coinfo').innerHTML='<div style="color:#e6c61a;font-size:13px;margin-bottom:6px">复'+n+'（'+(n===2?'二中二':n===3?'三中三':n===4?'四中四':'五中五')+'）</div><div style="color:#888;font-size:12px">数据不足'+n+'个，无法组合</div>';
+    return;
+  }
+  let r=1;for(let i=0;i<n;i++)r=r*(m-i)/(i+1);
+  const total=Math.round(r);
+  document.getElementById('cor').textContent=total;
+  const combos=[];
+  function combine(start,combo){
+    if(combo.length===n){combos.push(combo.join('-'));return}
+    for(let i=start;i<exp.length;i++){combine(i+1,[...combo,exp[i]])}
+  }
+  combine(0,[]);
+  coResult=combos.join('\n');
+  const label=n===2?'二中二':n===3?'三中三':n===4?'四中四':'五中五';
+  let html='<div style="color:#e6c61a;font-size:13px;margin-bottom:8px">复'+n+'（'+label+'）共 '+total+' 组</div>';
+  html+='<div style="color:#e6c61a;font-size:12px;line-height:2">';
+  combos.forEach((c,i)=>{
+    html+='<div>'+(i+1)+'. '+c+'</div>';
+  });
+  html+='</div>';
+  document.getElementById('coinfo').innerHTML=html;
+}
+function clrCo(){
+  document.getElementById('coi').value='';
+  document.getElementById('coc').textContent='0';
+  document.getElementById('cor').textContent='0';
+  coResult='';
+  coActive=0;
+  // 关闭所有按钮
+  document.querySelectorAll('.cbtns .cb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('coinfo').innerHTML=coInfoDefault;
+}
+function cpCo(){
+  if(!coResult)return toast('请先点击复N计算');
+  clip(coResult);
+}
+
+document.querySelectorAll('#nav div').forEach(d=>{
+  d.onclick=()=>{
+    document.querySelectorAll('#nav div').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+    d.classList.add('on');document.getElementById('p-'+d.dataset.p).classList.add('on');
+  };
+});
+
+mkZod('pz','p');mkZod('sz','s');
+mkBalls('pb',pS,'pr','lit');
+mkBalls('sb',sS,'sr','dim');
+mkAttr('pa','pb','pr',pS,'p');
+mkAttr('sa','sb','sr',sS,'s');
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
